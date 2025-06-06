@@ -1,0 +1,17 @@
+---
+
+- name: Get Metasploit
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb
+    dest: /tmp/msfinstall
+    mode: '0755'
+
+- name: Install Metasploit
+  ansible.builtin.command:
+    cmd: /tmp/msfinstall
+    creates: /opt/metasploit-framework/bin/msfconsole
+
+- name: Cleanup Metasploit installer
+  ansible.builtin.file:
+    path: /tmp/msfinstall
+    state: absent

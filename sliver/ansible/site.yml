@@ -1,0 +1,14 @@
+---
+
+- name: Sliver Server Setup
+  hosts: c2
+  gather_facts: false
+  become: true
+  remote_user: ubuntu
+  vars:
+    ansible_remote_tmp: '/tmp'
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  roles:
+    - metasploit
+    - sliver
+    - operators

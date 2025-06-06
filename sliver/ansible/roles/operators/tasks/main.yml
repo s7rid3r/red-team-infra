@@ -1,0 +1,13 @@
+---
+
+- name: Create operators in sliver
+  ansible.builtin.command:
+    cmd: "/root/sliver-server operator --name {{ item }} --lhost {{ ansible_host }} --save /tmp"
+    creates: "/tmp/{{ item }}_localhost.cfg"
+  loop: "{{ operators }}"
+
+- name: Copy the operator config files to local
+  ansible.builtin.fetch:
+    src: "/tmp/{{ item }}_{{ ansible_host }}.cfg"
+    dest: "../operator-configs"
+  loop: "{{ operators }}"

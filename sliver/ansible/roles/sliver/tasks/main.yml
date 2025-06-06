@@ -1,0 +1,20 @@
+---
+
+- name: Install sliver prerequisites
+  ansible.builtin.package:
+    name:
+      - git
+      - mingw-w64
+    state: present
+    update_cache: true
+
+- name: Download sliver
+  ansible.builtin.get_url:
+    url: https://sliver.sh/install
+    dest: /tmp/install
+    mode: '0755'
+
+- name: Install sliver
+  ansible.builtin.command:
+    cmd: /tmp/install
+    creates: /root/sliver-server
