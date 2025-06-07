@@ -20,6 +20,7 @@ provider "aws" {
 
 resource "aws_security_group" "sliver" {
   name = "sliver-sg"
+  # SSH Access
   ingress {
     from_port   = 0
     to_port     = 22
@@ -27,13 +28,38 @@ resource "aws_security_group" "sliver" {
     cidr_blocks = [var.cidr_block]
   }
 
+  # Team Server Access
   ingress {
     from_port   = 0
     to_port     = 31337
     protocol    = "tcp"
     cidr_blocks = [var.cidr_block]
   }
+  # HTTPS Access
+  ingress {
+    from_port   = 0
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
+  # HTTP Access
+  ingress {
+    from_port   = 0
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # DNS Access
+  ingress {
+    from_port   = 0
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow any outbound
   egress {
     from_port   = 0
     to_port     = 0
@@ -64,7 +90,7 @@ resource "ansible_host" "sliver" {
   }
 }
 
-// Example: Wait for SSH to be available before running Ansible
+# Wait for SSH to be available before running Ansible
 resource "null_resource" "wait_for_ssh" {
   depends_on = [aws_instance.sliver]
 
@@ -72,15 +98,15 @@ resource "null_resource" "wait_for_ssh" {
     inline = ["echo 'SSH is up'"]
     connection {
       type        = "ssh"
-      user        = "ubuntu"               // Adjust for your AMI
-      private_key = file(var.ssh_key_path) // Path to your private key
+      user        = "ubuntu"
+      private_key = file(var.ssh_key_path)
       host        = aws_instance.sliver.public_ip
     }
   }
 }
 
 resource "null_resource" "ansible_provision_local_exec" {
-  depends_on = [null_resource.wait_for_ssh] // Depends on SSH being ready
+  depends_on = [null_resource.wait_for_ssh]
 
   triggers = {
     instance_id = aws_instance.sliver.id
@@ -91,7 +117,6 @@ resource "null_resource" "ansible_provision_local_exec" {
       ansible-playbook ansible/site.yml \
         -i ansible/inventory.yml
     EOT
-    #working_dir = "${path.module}/ansible" // Assuming Ansible files are in ../ansible
-    on_failure = continue // Or 'fail' if you want Terraform to stop
+    on_failure = fail
   }
 }
