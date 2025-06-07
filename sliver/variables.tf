@@ -36,6 +36,6 @@ variable "ssh_key_path" {
 
 variable "cidr_block" {
   description = "Your CIDR block to use for security groups SSH access"
-  type = string
-  default = "0.0.0.0/0"
+  type        = string
+  default     = "0.0.0.0/0"
 }
