@@ -18,3 +18,9 @@
   ansible.builtin.command:
     cmd: /tmp/install
     creates: /root/sliver-server
+
+- name: Copy http implant config
+  ansible.builtin.template:
+    src: templates/http-c2.j2
+    dest: /root/.sliver/configs/http-c2.json
+    mode: "0600"
