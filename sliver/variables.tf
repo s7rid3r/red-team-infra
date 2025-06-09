@@ -54,12 +54,6 @@ variable "cloudflare_name" {
 }
 
 # C2 Variables
-variable "c2_users" {
-  description = "Names to be created as sliver operators"
-  type        = list(string)
-  default     = []
-}
-
 variable "c2_user_agent" {
   description = "User-agent string that will pass the mod_rewrite rules to be sent to C2 server"
   type        = string
