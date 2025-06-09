@@ -1,3 +1,4 @@
+# AWS Variables
 variable "aws_region" {
   description = "AMI ID to use to create the EC2 instance"
   type        = string
@@ -13,7 +14,7 @@ variable "aws_ami" {
 variable "aws_instance_name" {
   description = "Value of the Name tag for the EC2 instance"
   type        = string
-  default     = "sliver"
+  default     = "redirector"
 }
 
 variable "aws_instance_type" {
@@ -54,6 +55,12 @@ variable "cloudflare_name" {
 }
 
 # C2 Variables
+variable "c2_domain" {
+  description = "Domain name of C2 team server"
+  type        = string
+  default     = "c2.example.com"
+}
+
 variable "c2_user_agent" {
   description = "User-agent string that will pass the mod_rewrite rules to be sent to C2 server"
   type        = string

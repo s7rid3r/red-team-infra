@@ -1,0 +1,91 @@
+---
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Ensure required packages are installed
+  ansible.builtin.package:
+    name:
+      - apache2
+    state: present
+
+- name: Enable the Apache2 module proxy_http
+  community.general.apache2_module:
+    name: proxy_http
+    state: present
+
+- name: Enable the Apache2 module proxy_ajp
+  community.general.apache2_module:
+    name: proxy_ajp
+    state: present
+
+- name: Enable the Apache2 module rewrite
+  community.general.apache2_module:
+    name: rewrite
+    state: present
+
+- name: Enable the Apache2 module deflate
+  community.general.apache2_module:
+    name: deflate
+    state: present
+
+- name: Enable the Apache2 module headers
+  community.general.apache2_module:
+    name: headers
+    state: present
+
+- name: Enable the Apache2 module proxy_balancer
+  community.general.apache2_module:
+    name: proxy_balancer
+    state: present
+
+- name: Enable the Apache2 module proxy_connect
+  community.general.apache2_module:
+    name: proxy_connect
+    state: present
+
+- name: Enable the Apache2 module proxy_html
+  community.general.apache2_module:
+    name: proxy_html
+    state: present
+
+- name: Enable the Apache2 module ssl
+  community.general.apache2_module:
+    name: ssl
+    state: present
+
+- name: Generate SSL certs
+  ansible.builtin.import_role:
+    name: certbot
+
+- name: Copy apache default config
+  ansible.builtin.template:
+    src: templates/redirector.j2
+    dest: /etc/apache2/sites-available/000-default.conf
+    mode: "0644"
+# Figure out template variables
+
+- name: Copy .htaccess
+  ansible.builtin.template:
+    src: templates/htaccess.j2
+    dest: /var/www/html/.htaccess
+    mode: "0644"
+# Figure out template variables
+
+- name: Add block to apache2.conf
+  ansible.builtin.blockinfile:
+    path: /etc/apache2/apache2.conf
+    insertafter: EOF
+    prepend_newline: true
+    append_newline: true
+    block: |
+      <Directory /var/www/html>
+      AllowOverride ALL
+      Require all granted
+      </Directory>
+
+- name: Restart apache2 service
+  ansible.builtin.systemd_service:
+    name: apache2
+    state: restarted
