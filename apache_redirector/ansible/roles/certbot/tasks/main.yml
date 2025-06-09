@@ -1,0 +1,15 @@
+---
+
+- name: Install certbot
+  ansible.builtin.package:
+    name:
+      - certbot
+    update_cache: true
+
+- name: Create SSL certs with certbot
+  ansible.builtin.command:
+    cmd: "certbot certonly --webroot --webroot-path /var/www/html --preferred-challenges http -d {{ redirector_domain }} \
+      --register-unsafely-without-email --agree-tos"
+    creates:
+      - "/etc/letsencrypt/live/{{ redirector_domain }}/fullchain.pem"
+      - "/etc/letsencrypt/live/{{ redirector_domain }}/privkey.pem"
