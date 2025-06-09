@@ -2,16 +2,26 @@
 This repository hosts Infrastructure-as-Code (IaC) to deploy various red team infrastructure, i.e., C2 servers, redirectors, etc.
 
 ## Getting Started
-Export your AWS credentials as environment variables:
+### Environment Variables
+Set AWS credentials:
 ```
 export AWS_ACCESS_KEY_ID=
 ```
 ```
 export AWS_SECRET_ACCESS_KEY=
 ```
+Set Cloudflare API token:
+```
+export CLOUDFLARE_API_TOKEN=
+```
+### AWS Keypairs
+Create a keypair in AWS and make sure the "aws_key_pair" and "ssh_key_path" variables are correct. You can create a file named "variables.auto.tfvars" and set them there:
+```
+aws_key_pair    =   "test"
+ssh_key_path    = "~/.ssh/test.pem"
+```
 
-Create a keypairs in AWS and make sure the "key" and "ssh_key_path" variables are correct in variables.tf
-
+### Ansible
 Download anisble collections:
 ```
 ansible-galaxy collection install --requirements-file ./sliver/ansible/requirements.yml

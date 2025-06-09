@@ -9,13 +9,22 @@ terraform {
       source  = "ansible/ansible"
       version = "~>1.3.0"
     }
+
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5"
+    }
   }
 
   required_version = ">= 1.2.0"
 }
 
 provider "aws" {
-  region = var.region
+  region = var.aws_region
+}
+
+provider "cloudflare" {
+  # token pulled from $CLOUDFLARE_API_TOKEN
 }
 
 resource "aws_security_group" "sliver" {
@@ -25,7 +34,7 @@ resource "aws_security_group" "sliver" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.cidr_block]
+    cidr_blocks = [var.aws_cidr_block]
   }
 
   # Team Server Access
@@ -33,7 +42,7 @@ resource "aws_security_group" "sliver" {
     from_port   = 31337
     to_port     = 31337
     protocol    = "tcp"
-    cidr_blocks = [var.cidr_block]
+    cidr_blocks = [var.aws_cidr_block]
   }
   # HTTPS Access
   ingress {
@@ -69,13 +78,13 @@ resource "aws_security_group" "sliver" {
 }
 
 resource "aws_instance" "sliver" {
-  ami                    = var.ami
-  instance_type          = var.instance_type
-  key_name               = var.key
+  ami                    = var.aws_ami
+  instance_type          = var.aws_instance_type
+  key_name               = var.aws_key_pair
   vpc_security_group_ids = [aws_security_group.sliver.id]
 
   tags = {
-    Name = var.instance_name
+    Name = var.aws_instance_name
   }
 }
 
@@ -88,6 +97,15 @@ resource "ansible_host" "sliver" {
     ansible_python_interpreter   = "/usr/bin/python3"
     ansible_ssh_common_args      = "-o StrictHostKeyChecking=no"
   }
+}
+
+resource "cloudflare_dns_record" "update_dns_record" {
+  zone_id = var.cloudflare_zone_id
+  content = aws_instance.sliver.public_ip
+  name    = var.cloudflare_name
+  proxied = true
+  ttl     = 1
+  type    = var.cloudflare_type
 }
 
 # Wait for SSH to be available before running Ansible
@@ -113,9 +131,10 @@ resource "null_resource" "ansible_provision_local_exec" {
   }
 
   provisioner "local-exec" {
-    command = <<EOT
+    command    = <<EOT
       ansible-playbook ansible/site.yml \
-        -i ansible/inventory.yml
+        -i ansible/inventory.yml \
+        -e c2_user_agent=${var.c2_user_agent}
     EOT
     on_failure = fail
   }
